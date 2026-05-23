@@ -4,7 +4,6 @@ A robust, encapsulated Dynamic Array (Vector) implementation written in C11. Thi
 
 ## 🚀 Features
 
-* **Data Encapsulation:** Implementation details are hidden via opaque pointers (`struct DynamicArray`).
 * **Memory Safety:** Comprehensive bounds checking, overflow protections (`SIZE_MAX`), and safe capacity growth.
 * **Algorithms:** Embedded implementation of Bubble Sort, Quick Sort, and Binary Search for `double` types.
 * **Custom Logger:** Colorized console logger with file and line tracking for different log levels (`INFO`, `WARNING`, `ERROR`).
@@ -12,7 +11,7 @@ A robust, encapsulated Dynamic Array (Vector) implementation written in C11. Thi
 
 ## 🛠️ Project Structure
 
-* `DynamicArray.h` / `DynamicArray.c` — Core dynamic array implementation.
+* `DarrDouble.h` / `DarrDouble.c` — Core dynamic array implementation.
 * `Logger.h` / `Logger.c` — Custom logging utility with ANSI colors.
 * `test.h` / `test.c` — Stress tests and algorithm benchmarking.
 * `main.c` — Project entry point.
@@ -29,8 +28,8 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
 
 # 3. Run the benchmarks
-./build/Release/darr_double_project   # On Windows
-./build/darr_double_project			      # On Linux/macOS
+./build/Release/darr_double_project  # On Windows
+./build/darr_double_project  # On Linux/macOS
 ```
 
 ## 📊 Benchmark Results
@@ -57,5 +56,5 @@ The sorting benchmarks measure the isolated processing time for `double` dataset
 | **Bubble Sort** | Pre-sorted | 50,000 | **~0.00002** |
 
 ### 🔍 Key Insights
-* **Quick Sort Efficiency:** The Quick Sort implementation processes a large array of 500,000 elements in just ~0.015 seconds. Notably, the execution time drops to 0.004 seconds on a pre-sorted array. This demonstrates an effective pivot selection strategy that successfully avoids the worst-case $O(n^2)$ time complexity.
-* **Bubble Sort Limitations:** As expected, Bubble Sort shows typical $O(n^2)$ performance on unsorted data, taking nearly a full second (~0.914 s) for a dataset 10 times smaller than the one used for Quick Sort. However, it features a swap-detection optimization, allowing it to complete near-instantly (**0.000028 s**) in a single $O(n)$ pass if the array is already sorted.
+* **Quick Sort Efficiency:** The Quick Sort implementation processes a large array of 500,000 elements in just ~0.015 seconds. Notably, the execution time drops to ~0.004 seconds on a pre-sorted array. This demonstrates an effective pivot selection strategy that successfully avoids the worst-case $O(n^2)$ time complexity.
+* **Bubble Sort Limitations:** As expected, Bubble Sort shows typical $O(n^2)$ performance on unsorted data, taking ~0.695 seconds for a dataset 10 times smaller than the one used for Quick Sort. However, it features a swap-detection optimization, allowing it to complete near-instantly (**~0.00002 seconds**) in a single $O(n)$ pass if the array is already sorted.
