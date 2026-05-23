@@ -29,8 +29,8 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
 
 # 3. Run the benchmarks
-./build/Release/dynamic_array_project   # On Windows
-./build/dynamic_array_project			# On Linux/macOS
+./build/Release/darr_double_project   # On Windows
+./build/darr_double_project			      # On Linux/macOS
 ```
 
 ## 📊 Benchmark Results
