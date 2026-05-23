@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DynamicArray.h">
+    <ClInclude Include="DarrDouble.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Test.h">
@@ -26,7 +26,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DynamicArray.c">
+    <ClCompile Include="DarrDouble.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="main.c">

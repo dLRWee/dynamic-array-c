@@ -11,14 +11,14 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 endif()
 
-add_executable(dynamic_array_project
+add_executable(darr_double_project
     main.c
-    DynamicArray.c
-    DynamicArray.h
+    DarrDouble.c
+    DarrDouble.h
     Logger.c
     Logger.h
     Test.c
     Test.h
 )
 
-target_include_directories(dynamic_array_project PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(darr_double_project PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -4,26 +4,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "DynamicArray.h"
+#include "DarrDouble.h"
 
 #define DARR_DEFAULT_CAPACITY 10
 #define DARR_GROW_FACTOR 2
 
-struct DynamicArray
-{
-	double* data;
-	size_t size;
-	size_t capacity;
-};
-
-DynamicArray* darr_create()
+DarrDouble* darr_create()
 {
 	return darr_create_capacity(DARR_DEFAULT_CAPACITY);
 }
 
-DynamicArray* darr_create_capacity(size_t init_capacity)
+DarrDouble* darr_create_capacity(size_t init_capacity)
 {
-	DynamicArray* darr = malloc(sizeof(DynamicArray));
+	DarrDouble* darr = malloc(sizeof(DarrDouble));
 	if (darr == NULL)
 		return NULL;
 
@@ -41,39 +34,51 @@ DynamicArray* darr_create_capacity(size_t init_capacity)
 	return darr;
 }
 
-DynamicArray* darr_copy(const DynamicArray* darr)
+bool darr_copy(const DarrDouble* src, DarrDouble* dst)
 {
-	if (darr == NULL || darr->data == NULL)
-		return NULL;
+	if (src == NULL || dst == NULL)
+		return false;
 
-	DynamicArray* copy = darr_create_capacity(darr->capacity);
-	if (copy == NULL)
-		return NULL;
+	double* data_copy = malloc(sizeof(double) * src->capacity);
+	if (data_copy == NULL)
+		return false;
 
-	if (darr->size > 0)
-		memcpy(copy->data, darr->data, sizeof(double) * darr->size);
+	memcpy(data_copy, src->data, sizeof(double) * src->size);
+	free(dst->data);
 
-	copy->size = darr->size;
-	copy->capacity = darr->capacity;
+	dst->data = data_copy;
+	dst->size = src->size;
+	dst->capacity = src->capacity;
 
-	return copy;
+	return true;
 }
 
-void darr_free(DynamicArray* darr)
+void darr_destroy(DarrDouble* darr)
+{
+	if (darr == NULL) 
+		return;
+
+	free(darr->data);
+	darr->data = NULL;
+	darr->size = 0;
+	darr->capacity = 0;
+}
+
+void darr_free(DarrDouble* darr)
 {
 	if (darr == NULL)
 		return;
 
-	free(darr->data);
+	darr_destroy(darr);
 	free(darr);
 }
 
-bool darr_ensure_capacity(DynamicArray* darr, size_t min_capacity)
+bool darr_ensure_capacity(DarrDouble* darr, size_t min_capacity)
 {
-	if (darr == NULL || darr->data == NULL || DARR_GROW_FACTOR <= 1)
+	if (darr == NULL || DARR_GROW_FACTOR <= 1)
 		return false;
 
-	if (darr->capacity >= min_capacity)
+	if (darr->data != NULL && darr->capacity >= min_capacity)
 		return true;
 
 	size_t new_capacity = darr->capacity == 0 ? 1 : darr->capacity;
@@ -95,9 +100,9 @@ bool darr_ensure_capacity(DynamicArray* darr, size_t min_capacity)
 	return true;
 }
 
-bool darr_add_at(DynamicArray* darr, double value, size_t index)
+bool darr_add_at(DarrDouble* darr, double value, size_t index)
 {
-	if (darr == NULL || darr->data == NULL || index > darr->size)
+	if (darr == NULL || index > darr->size)
 		return false;
 
 	if (darr->size >= darr->capacity)
@@ -115,17 +120,17 @@ bool darr_add_at(DynamicArray* darr, double value, size_t index)
 	return true;
 }
 
-bool darr_add_first(DynamicArray* darr, double value)
+bool darr_add_first(DarrDouble* darr, double value)
 {
 	return darr_add_at(darr, value, 0);
 }
 
-bool darr_add_last(DynamicArray* darr, double value)
+bool darr_add_last(DarrDouble* darr, double value)
 {
 	return darr_add_at(darr, value, darr->size);
 }
 
-bool darr_remove_at(DynamicArray* darr, double* optional_dst, size_t index)
+bool darr_remove_at(DarrDouble* darr, double* optional_dst, size_t index)
 {
 	if (darr == NULL || darr->data == NULL || index >= darr->size)
 		return false;
@@ -138,27 +143,17 @@ bool darr_remove_at(DynamicArray* darr, double* optional_dst, size_t index)
 	return true;
 }
 
-bool darr_remove_first(DynamicArray* darr, double* optional_dst)
+bool darr_remove_first(DarrDouble* darr, double* optional_dst)
 {
 	return darr_remove_at(darr, optional_dst, 0);
 }
 
-bool darr_remove_last(DynamicArray* darr, double* optional_dst)
+bool darr_remove_last(DarrDouble* darr, double* optional_dst)
 {
 	return darr_remove_at(darr, optional_dst, darr->size - 1);
 }
 
-size_t darr_size(const DynamicArray* darr)
-{
-	return darr->size;
-}
-
-size_t darr_capacity(const DynamicArray* darr)
-{
-	return darr->capacity;
-}
-
-bool darr_contains(const DynamicArray* darr, double target)
+bool darr_contains(const DarrDouble* darr, double target)
 {
 	if (darr == NULL || darr->data == NULL || darr->size == 0)
 		return false;
@@ -172,7 +167,7 @@ bool darr_contains(const DynamicArray* darr, double target)
 	return false;
 }
 
-size_t darr_index_of(const DynamicArray* darr, double target)
+size_t darr_index_of(const DarrDouble* darr, double target)
 {
 	if (darr == NULL || darr->data == NULL || darr->size == 0)
 		return DARR_NOT_FOUND;
@@ -186,23 +181,18 @@ size_t darr_index_of(const DynamicArray* darr, double target)
 	return DARR_NOT_FOUND;
 }
 
-size_t darr_memory(const DynamicArray* darr)
+size_t darr_memory(const DarrDouble* darr)
 {
 	if (darr == NULL) 
 		return 0;
 
-	size_t structure_size = sizeof(DynamicArray);
+	size_t structure_size = sizeof(DarrDouble);
 	size_t buffer_size = sizeof(double) * darr->capacity;
 
 	return structure_size + buffer_size;
 }
 
-bool darr_is_empty(const DynamicArray* darr)
-{
-	return darr->size == 0;
-}
-
-bool darr_get(const DynamicArray* darr, double* dst, size_t index)
+bool darr_get(const DarrDouble* darr, double* dst, size_t index)
 {
 	if (darr == NULL || darr->data == NULL || index >= darr->size)
 		return false;
@@ -211,7 +201,7 @@ bool darr_get(const DynamicArray* darr, double* dst, size_t index)
 	return true;
 }
 
-bool darr_set(DynamicArray* darr, double value, size_t index)
+bool darr_set(DarrDouble* darr, double value, size_t index)
 {
 	if (darr == NULL || darr->data == NULL || index >= darr->size)
 		return false;
@@ -220,28 +210,7 @@ bool darr_set(DynamicArray* darr, double value, size_t index)
 	return true;
 }
 
-void darr_print(const DynamicArray* darr)
-{
-	if (darr == NULL || darr->data == NULL)
-		return;
-
-	printf("[");
-	for (size_t i = 0; i < darr->size; i++)
-	{
-		printf("%.2f", darr->data[i]);
-		if (i != darr->size - 1)
-			printf(", ");
-	}
-	printf("]\n");
-}
-
-void darr_print_log(const DynamicArray* darr)
-{
-	darr_print(darr);
-	printf("size = %zu, capacity = %zu\n", darr_size(darr), darr_capacity(darr));
-}
-
-size_t darr_binary_search(const DynamicArray* darr, double target)
+size_t darr_binary_search(const DarrDouble* darr, double target)
 {
 	if (darr == NULL || darr->data == NULL || darr->size == 0)
 		return DARR_NOT_FOUND;
@@ -269,7 +238,7 @@ size_t darr_binary_search(const DynamicArray* darr, double target)
 	return DARR_NOT_FOUND;
 }
 
-void darr_bubble_sort(DynamicArray* darr)
+void darr_bubble_sort(DarrDouble* darr)
 {
 	if (darr == NULL || darr->data == NULL || darr->size == 0)
 		return;
@@ -295,7 +264,7 @@ void darr_bubble_sort(DynamicArray* darr)
 	}
 }
 
-void darr_quick_sort(DynamicArray* darr, size_t start, size_t end)
+void darr_quick_sort(DarrDouble* darr, size_t start, size_t end)
 {
 	if (darr == NULL || darr->data == NULL || darr->size == 0 || start >= end)
 		return;

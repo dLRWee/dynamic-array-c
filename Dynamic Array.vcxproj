@@ -127,12 +127,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="DynamicArray.h" />
+    <ClInclude Include="DarrDouble.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="Test.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DynamicArray.c" />
+    <ClCompile Include="DarrDouble.c" />
     <ClCompile Include="Logger.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="Test.c" />

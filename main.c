@@ -1,5 +1,6 @@
 #include "Logger.h"
 #include "Test.h"
+#include "DarrDouble.h"
 
 int main()
 {

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "DynamicArray.h"
+#include "DarrDouble.h"
 #include "Logger.h"
 #include "Test.h"
 
@@ -23,15 +23,10 @@ static double get_elapsed_time(struct timespec start, struct timespec end)
 		(double)(end.tv_nsec - start.tv_nsec) / 1e9;
 }
 
-static DynamicArray* create_and_fill_array(size_t size, bool sorted)
+static bool fill(DarrDouble* darr, size_t size, bool sorted)
 {
-	LOG_INFO("Creating a darr with capacity of %zu", size);
-	DynamicArray* darr = darr_create_capacity(size);
 	if (darr == NULL)
-	{
-		LOG_ERROR("Couldn't create a darr");
-		return NULL;
-	}
+		return false;
 
 	LOG_INFO("Filling the darr");
 	for (size_t i = 1; i <= size; i++)
@@ -43,26 +38,36 @@ static DynamicArray* create_and_fill_array(size_t size, bool sorted)
 		if (!darr_add_last(darr, value))
 		{
 			LOG_ERROR("Couldn't add an element");
-			darr_free(darr);
-			return NULL;
+			return false;
 		}
 	}
-	return darr;
+
+	return true;
 }
 
 static double run_quick_sort_scenario(size_t size, bool sorted)
 {
 	struct timespec start, end;
-	DynamicArray* darr = create_and_fill_array(size, sorted);
-	if (darr == NULL) return 0.0;
+	DarrDouble darr = { 0 };
+	if (!fill(&darr, size, sorted))
+	{
+		LOG_ERROR("Couldn't fill the darr");
+		darr_destroy(&darr);
+		return 0.0;
+	}
 
 	LOG_INFO("Start sorting");
+	const size_t current_size = darr_size(&darr);
+
 	RECORD_TIME(start);
-	darr_quick_sort(darr, 0, darr_size(darr) - 1);
+	if (current_size > 0)
+	{
+		darr_quick_sort(&darr, 0, current_size - 1);
+	}
 	RECORD_TIME(end);
 
 	LOG_INFO("Free the darr");
-	darr_free(darr);
+	darr_destroy(&darr);
 
 	return get_elapsed_time(start, end);
 }
@@ -70,16 +75,21 @@ static double run_quick_sort_scenario(size_t size, bool sorted)
 static double run_bubble_sort_scenario(size_t size, bool sorted)
 {
 	struct timespec start, end;
-	DynamicArray* darr = create_and_fill_array(size, sorted);
-	if (darr == NULL) return 0.0;
+	DarrDouble darr = { 0 };
+	if (!fill(&darr, size, sorted))
+	{
+		LOG_ERROR("Couldn't fill the darr");
+		darr_destroy(&darr);
+		return 0.0;
+	}
 
 	LOG_INFO("Start sorting");
 	RECORD_TIME(start);
-	darr_bubble_sort(darr);
+	darr_bubble_sort(&darr);
 	RECORD_TIME(end);
 
 	LOG_INFO("Free the darr");
-	darr_free(darr);
+	darr_destroy(&darr);
 
 	return get_elapsed_time(start, end);
 }
@@ -101,22 +111,20 @@ double test_stress()
 
 	LOG_INFO("Creating a darr with capacity of 0");
 	RECORD_TIME(start);
-	DynamicArray* darr = darr_create_capacity(0);
+
+	DarrDouble darr = { 0 };
+
 	RECORD_TIME(end);
-	if (darr == NULL)
-	{
-		LOG_ERROR("Couldn't create a darr");
-		return 0.0;
-	}
 	pure_time += get_elapsed_time(start, end);
 
 	LOG_INFO("Filling the darr via darr_add_first with %llu elements", STRESS_DARR_SIZE / 2);
 	RECORD_TIME(start);
 	for (size_t i = 0; i < STRESS_DARR_SIZE / 2; i++)
 	{
-		if (!darr_add_first(darr, (double)i)) {
+		if (!darr_add_first(&darr, (double)i)) 
+		{
 			LOG_ERROR("Couldn't add an element");
-			darr_free(darr);
+			darr_destroy(&darr);
 			return 0.0;
 		}
 	}
@@ -127,27 +135,29 @@ double test_stress()
 	RECORD_TIME(start);
 	for (size_t i = 0; i < last_half; i++)
 	{
-		if (!darr_add_last(darr, (double)i)) {
+		if (!darr_add_last(&darr, (double)i)) 
+		{
 			LOG_ERROR("Couldn't add an element");
-			darr_free(darr);
+			darr_destroy(&darr);
 			return 0.0;
 		}
 	}
 	RECORD_TIME(end);
 	pure_time += get_elapsed_time(start, end);
 
-	LOG_INFO("Current size: %zu", darr_size(darr));
-	LOG_INFO("Current capacity: %zu", darr_capacity(darr));
-	LOG_INFO("Current memory usage: %.2f MB", darr_memory(darr) / 1024.0 / 1024.0);
+	LOG_INFO("Current size: %zu", darr_size(&darr));
+	LOG_INFO("Current capacity: %zu", darr_capacity(&darr));
+	LOG_INFO("Current memory usage: %.2f MB", darr_memory(&darr) / 1024.0 / 1024.0);
 
 	LOG_INFO("Getting first %llu elements", STRESS_DARR_SIZE / 2);
 	RECORD_TIME(start);
 	for (size_t i = 0; i < STRESS_DARR_SIZE / 2; i++)
 	{
 		double ignored;
-		if (!darr_get(darr, &ignored, i)) {
+		if (!darr_get(&darr, &ignored, i)) 
+		{
 			LOG_ERROR("Couldn't get an element");
-			darr_free(darr);
+			darr_destroy(&darr);
 			return 0.0;
 		}
 	}
@@ -158,9 +168,10 @@ double test_stress()
 	RECORD_TIME(start);
 	for (size_t i = STRESS_DARR_SIZE / 2; i < STRESS_DARR_SIZE; i++)
 	{
-		if (!darr_set(darr, 1.0, i)) {
+		if (!darr_set(&darr, 1.0, i)) 
+		{
 			LOG_ERROR("Couldn't set an element");
-			darr_free(darr);
+			darr_destroy(&darr);
 			return 0.0;
 		}
 	}
@@ -171,9 +182,10 @@ double test_stress()
 	RECORD_TIME(start);
 	for (size_t i = 0; i < last_half / 2; i++)
 	{
-		if (!darr_remove_last(darr, NULL) || !darr_remove_first(darr, NULL)) {
-			LOG_ERROR("Couldn't remove an element. Free the darr");
-			darr_free(darr);
+		if (!darr_remove_last(&darr, NULL) || !darr_remove_first(&darr, NULL)) 
+		{
+			LOG_ERROR("Couldn't remove an element");
+			darr_destroy(&darr);
 			return 0.0;
 		}
 	}
@@ -182,7 +194,7 @@ double test_stress()
 
 	LOG_INFO("Free the darr");
 	RECORD_TIME(start);
-	darr_free(darr);
+	darr_destroy(&darr);
 	RECORD_TIME(end);
 	pure_time += get_elapsed_time(start, end);
 

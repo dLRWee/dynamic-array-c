@@ -30,7 +30,7 @@ cmake --build build --config Release
 
 # 3. Run the benchmarks
 ./build/Release/dynamic_array_project   # On Windows
-./build/dynamic_array_project		# On Linux/macOS
+./build/dynamic_array_project			# On Linux/macOS
 ```
 
 ## 📊 Benchmark Results
@@ -43,7 +43,7 @@ This benchmark evaluates the complete lifecycle of the dynamic array (`darr`), i
 * **Allocated Capacity:** 262,144 elements (reflecting automatic power-of-two growth).
 * **Peak Memory Usage:** 2.00 MB.
 * **Operations Tested:** Retrieval, element modification, mass removal (`darr_remove_last` / `darr_remove_first`), and container destruction.
-* **Total Execution Time:** **2.158858 seconds** (includes all underlying memory reallocations).
+* **Total Execution Time:** **~2.14 seconds** (includes all underlying memory reallocations).
 
 ### 2. Sorting Algorithm Performance
 The sorting benchmarks measure the isolated processing time for `double` datasets. All logging operations are excluded from these timers.
@@ -51,10 +51,10 @@ The sorting benchmarks measure the isolated processing time for `double` dataset
 
 | Algorithm | Array State | Element Count | Execution Time (seconds) |
 | :--- | :--- | :--- | :--- |
-| **Quick Sort** | Unsorted (Random) | 500,000 | **0.015325** |
-| **Quick Sort** | Pre-sorted | 500,000 | **0.004374** |
-| **Bubble Sort** | Unsorted (Random) | 50,000 | **0.913794** |
-| **Bubble Sort** | Pre-sorted | 50,000 | **0.000028** |
+| **Quick Sort** | Unsorted (Random) | 500,000 | **~0.015** |
+| **Quick Sort** | Pre-sorted | 500,000 | **~0.004** |
+| **Bubble Sort** | Unsorted (Random) | 50,000 | **~0.695** |
+| **Bubble Sort** | Pre-sorted | 50,000 | **~0.00002** |
 
 ### 🔍 Key Insights
 * **Quick Sort Efficiency:** The Quick Sort implementation processes a large array of 500,000 elements in just ~0.015 seconds. Notably, the execution time drops to 0.004 seconds on a pre-sorted array. This demonstrates an effective pivot selection strategy that successfully avoids the worst-case $O(n^2)$ time complexity.
